@@ -1,11 +1,13 @@
-{ config, pkgs, lib, ... }:
+{ inputs, config, pkgs, lib, ... }:
 
 {
   imports =
     [ 
       ./hardware-configuration.nix
+			inputs.home-manager.nixosModules.home-manager
     ];
 
+	nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.nixPath =
     [
       "nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos"
@@ -45,6 +47,7 @@
       firefox
       freetube
       git
+			home-manager
       hyprland
       luakit
       kitty
@@ -53,6 +56,7 @@
       playerctl
       python3
       R
+      starship
       vim
       waybar
       wofi
@@ -72,6 +76,28 @@ services.xserver.displayManager.sddm.wayland.enable = true;
 programs.hyprland = {
   enable = true;
   xwayland.enable = true;
+};
+
+programs.starship.enable = true;
+programs.starship.settings = {
+  add_newline = false;
+  format = "$shlvl$shell$username$hostname$nix_shell$git_branch$git_commit$git_state$git_status$directory$jobs$cmd_duration$character";
+  shlvl = {
+    disabled = false;
+    symbol = "ﰬ";
+    style = "bright-red bold";
+  };
+  shell = {
+    disabled = false;
+    format = "$indicator";
+    fish_indicator = "";
+    bash_indicator = "[BASH](bright-white) ";
+    zsh_indicator = "[ZSH](bright-white) ";
+  };
+  username = {
+    style_user = "bright-white bold";
+    style_root = "bright-red bold";
+  };
 };
 
 #Audio and bluetooth
@@ -149,5 +175,22 @@ services.blueman.enable = true;
         ];
     };
 
+
+#Developer environment
+programs.neovim = {
+  viAlias = true;
+  vimAlias = true;
+  enable = true;
+  defaultEditor = true;
+};
+
+#Home-manager
+  home-manager = {
+    backupFileExtension = "backup";
+    extraSpecialArgs = { inherit inputs; };
+    users = {
+        jrha = import ../homemanager/system/home.nix;
+    };
+  };
 
 }
